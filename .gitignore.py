@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+ENV/
+env/
+.venv/
+.env/
+.idea/
+.vscode/
+*.swp
+*.swo
+*.local
+.env
+.env.local
+.env.*.local

@@ -1,0 +1,62 @@
+{% extends 'chat/base.html' %}
+
+{% block title %}История - Все диалоги{% endblock %}
+
+{% block content %}
+<h1> История диалогов</h1>
+
+{% if messages %}
+    <div style="max-width: 800px;">
+        {% for message in messages %}
+            <div style="
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                padding: 15px;
+                margin-bottom: 15px;
+                background-color: white;
+            ">
+                <div style="margin-bottom: 10px;">
+                    <strong>Ваше сообщение:</strong>
+                    <p style="
+                        margin-top: 5px;
+                        padding: 10px;
+                        background-color: #e3f2fd;
+                        border-radius: 3px;
+                    ">
+                        {{ message.user_message }}
+                    </p>
+                </div>
+
+                <div style="margin-bottom: 10px;">
+                    <strong>Ответ бота:</strong>
+                    <p style="
+                        margin-top: 5px;
+                        padding: 10px;
+                        background-color: #f5f5f5;
+                        border-radius: 3px;
+                    ">
+                        {{ message.bot_response }}
+                    </p>
+                </div>
+
+                <div style="
+                    text-align: right;
+                    font-size: 12px;
+                    color: #999;
+                ">
+                    {{ message.created_at|date:"d.m.Y H:i" }}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p style="
+        text-align: center;
+        padding: 40px;
+        color: #999;
+        font-size: 18px;
+    ">
+        История пуста. Начните общение с ботом в чате.
+    </p>
+{% endif %}
+{% endblock %}
