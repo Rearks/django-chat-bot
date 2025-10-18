@@ -360,7 +360,6 @@ def telegram_webhook(request):
             "schemas_count": len(schemas),
             "embedding_model_loaded": bool(embedding_model),
         }
-        print(f"DIAG: {body}", flush=True)
         return json.dumps(body, ensure_ascii=False), 200, {"Content-Type": "application/json; charset=utf-8"}
 
     if not _initialized:
@@ -371,11 +370,40 @@ def telegram_webhook(request):
         if not data:
             return "OK", 200
 
-        # Telegram webhook
-        if "message" in data:
-            msg = data["message"]
+        # 1) Web API: message это строка
+        if isinstance(data.get("message"), str):
+            user_message = data["message"].strip()
+            if not user_message:
+                return {"error": "Пустое сообщение"}, 400
+
+            logger.info("WEB API: %s", safe_truncate(user_message))
+            ai_response = get_ai_response(user_message)
+            return {"response": ai_response}, 200
+
+        # 2) Telegram update
+        if (
+            "update_id" in data
+            or isinstance(data.get("message"), dict)
+            or "edited_message" in data
+            or "channel_post" in data
+            or "callback_query" in data
+        ):
+            # Достаём Telegram message
+            msg = (
+                data.get("message")
+                or data.get("edited_message")
+                or data.get("channel_post")
+                or (data.get("callback_query", {}) or {}).get("message")
+            )
+
+            if not isinstance(msg, dict):
+                return "OK", 200
+
             chat_id = (msg.get("chat") or {}).get("id")
-            text = msg.get("text") or ""
+            text = msg.get("text") or msg.get("caption")
+            # для callback_query текст бывает в data
+            if not text and isinstance(data.get("callback_query"), dict):
+                text = data["callback_query"].get("data")
             is_bot = bool((msg.get("from") or {}).get("is_bot"))
 
             if not chat_id or not text:
@@ -384,22 +412,11 @@ def telegram_webhook(request):
                 return "OK", 200
 
             logger.info("TG message chat=%s: %s", chat_id, safe_truncate(text))
-            print(f"TG MSG: chat={chat_id}, text={safe_truncate(text)}", flush=True)
-
             ai_response = get_ai_response(text)
             send_telegram_message(chat_id, ai_response)
             return "OK", 200
 
-        # Простой Web API
-        if isinstance(data.get("message"), str):
-            user_message = data["message"].strip()
-            if not user_message:
-                return {"error": "Пустое сообщение"}, 400
-            logger.info("WEB API: %s", safe_truncate(user_message))
-            print(f"WEB API: {safe_truncate(user_message)}", flush=True)
-            ai_response = get_ai_response(user_message)
-            return {"response": ai_response}, 200
-
+        # 3) Неизвестный формат
         logger.warning("Bad request: keys=%s", list(data.keys()))
         return "Bad Request", 400
 
