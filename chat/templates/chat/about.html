@@ -8,7 +8,7 @@
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         min-height: 100vh;
     }
-
+    
     #send-btn {
         padding: 10px 20px;
         background-color: #333;
@@ -18,18 +18,18 @@
         cursor: pointer;
         transition: all 0.3s ease;
     }
-
+    
     #send-btn:hover {
         border: 2px solid #667eea;
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
-
+    
     #send-btn:active {
         background-color: #667eea;
         transform: translateY(0);
     }
-
+    
     #send-btn.loading {
         background-color: #555;
         cursor: wait;
@@ -54,9 +54,9 @@
 
 <!-- Поле ввода и кнопка -->
 <div style="display: flex; gap: 10px;">
-    <input
-        type="text"
-        id="message-input"
+    <input 
+        type="text" 
+        id="message-input" 
         placeholder="Напишите сообщение..."
         style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"
     />
@@ -81,7 +81,7 @@
         btn.disabled = true;
         btn.classList.add('loading');
         const originalText = btn.textContent;
-
+        
         // Анимация точек
         let dots = 0;
         const loadingInterval = setInterval(() => {

@@ -18,6 +18,11 @@ def history_page(request):
     return render(request, 'chat/history.html', {'messages': messages})
 
 
+def about_page(request):
+    """Показываем страницу О нас"""
+    return render(request, 'chat/about.html')
+
+
 def call_cloud_function_bot(user_message):
     """Отправляем сообщение боту и получаем ответ"""
 
