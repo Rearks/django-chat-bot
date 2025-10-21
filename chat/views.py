@@ -8,56 +8,47 @@ from .models import ChatMessage
 
 
 def chat_page(request):
-    """Показываем страницу с чатом"""
     return render(request, 'chat/chat.html')
 
 
 def history_page(request):
-    """Показываем историю всех сообщений"""
     messages = ChatMessage.objects.all()
     return render(request, 'chat/history.html', {'messages': messages})
 
 
 def about_page(request):
-    """Показываем страницу О нас"""
     return render(request, 'chat/about.html')
 
 
 def call_cloud_function_bot(user_message):
-    """Отправляем сообщение боту и получаем ответ"""
-
-    # URL вашего бота в облаке
     API_URL = "https://my-telegram-bot-620646991187.us-central1.run.app"
 
     try:
-        # Отправляем POST запрос
+        # POST запрос
         response = requests.post(
             API_URL,
             json={"message": user_message},
-            timeout=60
+            timeout=120
         )
 
-        # Получаем ответ в формате JSON
+        #  ответ в формате JSON
         result = response.json()
 
-        # Если всё ОК, возвращаем ответ бота
         if response.status_code == 200:
             return result.get("response", "Бот не прислал ответ")
         else:
             return f"Ошибка: {response.status_code}"
 
     except requests.exceptions.Timeout:
-        return "Бот не ответил (таймаут)"
+        return "Бот не ответил"
 
     except Exception as e:
         return f"Ошибка: {str(e)}"
 
 
-@csrf_exempt  # Отключаем CSRF для простоты (в продакшене включить!)
+@csrf_exempt
 @require_http_methods(["POST"])
 def send_message(request):
-    """Получаем сообщение от пользователя, отправляем боту, сохраняем в БД"""
-
     try:
         # Читаем JSON из запроса
         data = json.loads(request.body)

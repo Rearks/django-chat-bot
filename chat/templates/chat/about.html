@@ -1,185 +1,243 @@
 {% extends 'chat/base.html' %}
-
-{% block title %}Чат с ботом{% endblock %}
+{% load static %}
+{% block title %}Обо мне{% endblock %}
 
 {% block content %}
+
 <style>
     body {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
+        background-color: #f0f0f0;
+        font-family: Arial, sans-serif;
     }
-    
-    #send-btn {
-        padding: 10px 20px;
-        background-color: #333;
-        color: white;
+
+    .about-section {
+        max-width: 1000px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+
+    /* Заголовок */
+    h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 40px;
+    }
+
+    /* Контейнер с карточками */
+    .cards-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+
+    /* Карточка */
+    .card {
+        background: white;
+        border-radius: 8px;
         border: 2px solid transparent;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: all 0.3s ease;
+        overflow: hidden;
+        transition: border 0.3s;
     }
-    
-    #send-btn:hover {
+
+    .card:hover {
         border: 2px solid #667eea;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
-    
-    #send-btn:active {
+
+    /*
+
+    ФОТОГРАФИИ
+
+    */
+    .card-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .card-content {
+        padding: 20px;
+    }
+
+    .card-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    /*
+
+    ТЕКСТ
+
+    */
+    .card-text {
+        color: #666;
+        line-height: 1.6;
+    }
+
+    /* Текстовая секция */
+    .text-section {
+        background: white;
+        border-radius: 8px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+
+    .text-section h2 {
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    .text-section p {
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 15px;
+    }
+
+    /* Кнопка */
+    .back-button {
+        display: inline-block;
+        padding: 12px 30px;
         background-color: #667eea;
-        transform: translateY(0);
-    }
-    
-    #send-btn.loading {
-        background-color: #555;
-        cursor: wait;
-    }
-</style>
-
-<h1 style="color: white; text-align: center;">Чат с ботом</h1>
-
-<!-- Область сообщений -->
-<div id="chat-messages" style="
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    height: 400px;
-    overflow-y: auto;
-    padding: 15px;
-    background-color: white;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-">
-    <p style="color: #999; text-align: center;">Начните общение с ботом</p>
-</div>
-
-<!-- Поле ввода и кнопка -->
-<div style="display: flex; gap: 10px;">
-    <input 
-        type="text" 
-        id="message-input" 
-        placeholder="Напишите сообщение..."
-        style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"
-    />
-    <button id="send-btn" onclick="sendMessage()">
-        Отправить
-    </button>
-</div>
-
-<script>
-    // Отправка сообщения боту
-    function sendMessage() {
-        const input = document.getElementById('message-input');
-        const btn = document.getElementById('send-btn');
-        const message = input.value.trim();
-
-        if (!message) {
-            alert('Напишите сообщение');
-            return;
-        }
-
-        // Блокируем кнопку и показываем загрузку
-        btn.disabled = true;
-        btn.classList.add('loading');
-        const originalText = btn.textContent;
-        
-        // Анимация точек
-        let dots = 0;
-        const loadingInterval = setInterval(() => {
-            dots = (dots + 1) % 4;
-            btn.textContent = 'Отправка' + '.'.repeat(dots);
-        }, 500);
-
-        // POST запрос на сервер
-        fetch('/api/send-message/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify({ message: message })
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Останавливаем анимацию
-            clearInterval(loadingInterval);
-            btn.disabled = false;
-            btn.classList.remove('loading');
-            btn.textContent = originalText;
-
-            if (data.error) {
-                alert('Ошибка: ' + data.error);
-            } else {
-                // Показываем сообщения
-                displayMessage(data.user_message, data.bot_response);
-                input.value = '';
-            }
-        })
-        .catch(error => {
-            clearInterval(loadingInterval);
-            btn.disabled = false;
-            btn.classList.remove('loading');
-            btn.textContent = originalText;
-            alert('Ошибка соединения');
-        });
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        border: 2px solid transparent;
+        transition: border 0.3s;
     }
 
-    // Показываем сообщение в чате
-    function displayMessage(userMsg, botMsg) {
-        const chatDiv = document.getElementById('chat-messages');
-
-        // Удаляем приветствие при первом сообщении
-        if (chatDiv.innerHTML.includes('Начните общение')) {
-            chatDiv.innerHTML = '';
-        }
-
-        // Сообщение пользователя
-        chatDiv.innerHTML += `
-            <div style="margin-bottom: 15px; padding: 10px; background-color: #e3f2fd; border-radius: 5px; text-align: right; animation: slideIn 0.3s ease;">
-                <strong>Вы:</strong> ${userMsg}
-            </div>
-        `;
-
-        // Ответ бота
-        chatDiv.innerHTML += `
-            <div style="margin-bottom: 15px; padding: 10px; background-color: #f5f5f5; border-radius: 5px; animation: slideIn 0.3s ease;">
-                <strong>Бот:</strong> ${botMsg}
-            </div>
-        `;
-
-        // Прокручиваем вниз
-        chatDiv.scrollTop = chatDiv.scrollHeight;
-    }
-
-    // Получаем CSRF токен из cookies
-    function getCookie(name) {
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-            cookie = cookie.trim();
-            if (cookie.startsWith(name + '=')) {
-                return decodeURIComponent(cookie.substring(name.length + 1));
-            }
-        }
-        return null;
-    }
-
-    // Отправка по Enter
-    document.getElementById('message-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    });
-</script>
-
-<style>
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    .back-button:hover {
+        border: 2px solid #333;
     }
 </style>
+
+<div class="about-section">
+    <!--
+
+    ЗАГОЛОВОК
+
+    -->
+    <h1>Психолог, клинический психолог, детский психолог.</h1>
+
+    <!-- Карточки с изображениями -->
+    <div class="cards-container">
+
+        <!--
+
+        КАРТОЧКА 1
+
+        -->
+        <div class="card">
+            <!-- ФОТО 1 -->
+            <img
+                src="{% static 'img1.png' %}"
+                alt="Психотерапевт"
+                class="card-image"
+            />
+            <div class="card-content">
+                <!-- ЗАГОЛОВОК 1 -->
+                <h3 class="card-title">Психотерапевт</h3>
+                <!-- ТЕКСТ 1 -->
+                <p class="card-text">
+                    Психотерапевт с большим опытом.
+                </p>
+            </div>
+        </div>
+
+        <!--
+
+        КАРТОЧКА 2
+
+        -->
+        <div class="card">
+            <!-- ФОТО 2 -->
+            <img
+                src="{% static 'img2.jpg' %}"
+                alt="О каких схемах речь?"
+                class="card-image"
+            />
+            <div class="card-content">
+                <!-- ЗАГОЛОВОК 2 -->
+                <h3 class="card-title">Современные технологии</h3>
+                <!-- ТЕКСТ 2 -->
+                <p class="card-text">
+                    Когнитивные схемы — это глубинные убеждения человека о нём самом,
+                    его взаимоотношениях с другими людьми и мире вокруг.
+                    Схемы формируются в детском возрасте, и огромное влияние
+                    на этот процесс оказывает семья, отношения ребёнка со
+                    значимыми взрослыми и социумом.
+
+.
+                </p>
+            </div>
+        </div>
+
+        <!--
+
+        КАРТОЧКА 3
+
+        -->
+        <div class="card">
+            <!-- ФОТО 3:  -->
+            <img
+                src="{% static 'img3.png' %}"
+                alt="<База>"
+                class="card-image"
+            />
+            <div class="card-content">
+                <!-- ЗАГОЛОВОК 3 -->
+                <h3 class="card-title">Базовые потребности</h3>
+                <!-- ТЕКСТ 3 -->
+                <ul class="card-list">
+    <li>безопасность и связь со значимыми взрослыми;</li>
+    <li>возможность выражать свои эмоции и нужды;</li>
+    <li>возможность проявлять самостоятельность и действовать автономно;</li>
+    <li>установка реалистичных, понятных и разумных границ;</li>
+    <li>возможность регулярно проявлять спонтанность и играть.</li>
+</ul>
+            </div>
+        </div>
+
+    </div>
+
+    <!--
+ ТЕКСТ
+    -->
+    <div class="text-section">
+        <!-- БОЛЬШОЙ ЗАГОЛОВОК -->
+        <h2>Почему выбирают меня?</h2>
+
+        <!-- ТЕКСТ -  <p> -->
+        <ul class="text-section">
+
+<li>Работаю в интегративном подходе: со взрослыми преимущественно схема-терапия (3-я волна КБТ), с детьми - игровые методы, песочная терапия (sandplay) и Арт-терапия.</li>
+
+<li>В своей практике я отдаю предпочтения принципам гуманизма, атмосфере безусловного принятия и уважения.</li>
+
+<li>Мой девиз «Сделай шаг, и дорога появится сама собой» С.Джобс</li>
+
+<li>Работаю в направлениях: Арт-терапия, Песочная терапия, Схема-терапия, Клиническая психология.</li>
+        </ul>
+
+        <p>
+            На сайте запущен чат-бот для ознакомления с основными режимами схематерапии.
+        </p>
+
+        <p>
+            <strong>С чем ко мне обращаются:</strong><br>
+            • ☑️тревога,беспокойство,страхи;<br>
+            • ☑️психосоматические проявления;<br>
+            • ☑️стрессовые состояния;<br>
+            • ☑️гиперактивность или замкнутость;<br>
+            • ☑️детско-родительские отношения;
+        </p>
+    </div>
+
+    <!-- Кнопка возврата -->
+    <div style="text-align: center;">
+        <a href="{% url 'chat_page' %}" class="back-button">← Вернуться к чату</a>
+    </div>
+</div>
+
 {% endblock %}
