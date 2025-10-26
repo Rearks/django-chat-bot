@@ -10,14 +10,14 @@ from google.cloud import storage
 try:
     from sentence_transformers import SentenceTransformer
 except Exception:
-    SentenceTransformer = None  # без этой либы RAG отключится
+    SentenceTransformer = None
 
-# ========= ЛОГИ =========
+#ЛОГИ
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO").upper()
 logging.basicConfig(level=LOG_LEVEL, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-# ========= КОНФИГ (дефолты как в старом) =========
+#КОНФИГ
 GCS_BUCKET = os.environ.get("GCS_BUCKET", "telegram-bot-schemas")
 SCHEMAS_FILE = os.environ.get("SCHEMAS_FILE", "schemas.txt.txt")
 MODEL_GCS_PREFIX = os.environ.get("MODEL_GCS_PREFIX", "model/")
@@ -26,7 +26,7 @@ MODEL_LOCAL_DIR = os.environ.get("MODEL_LOCAL_DIR", "/tmp/model")
 TG_TOKEN = os.environ.get("TG_TOKEN")
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
 
-# Модели: сначала те, что стабильно пишут content; GLM — в конце
+# Модели
 OPENROUTER_MODELS = [
     m.strip()
     for m in os.environ.get(
@@ -45,17 +45,17 @@ TOP_K_LOG = int(os.environ.get("TOP_K_LOG", "3"))
 TRIGGER_BONUS = float(os.environ.get("TRIGGER_BONUS", "0.20"))
 SIM_THRESHOLD = float(os.environ.get("SIM_THRESHOLD", "0.0"))
 
-# ========= HTTP =========
+#HTTP
 http = requests.Session()
 http.headers.update({"Accept": "application/json"})
 
-# ========= ГЛОБАЛЫ =========
+#ГЛОБАЛЫ
 _initialized = False
 embedding_model: Optional[SentenceTransformer] = None
 # каждая схема: dict{full,title,triggers,instruction,embed_text,embedding}
 schemas: List[Dict[str, Any]] = []
 
-# ========= ИНСТРУКЦИИ =========
+#ИНСТРУКЦИИ
 BASE_INSTRUCTION = (
     "Ты живой человек и сидишь в чате с другими. Отвечай коротко максимум 1-2 предложения, "
     "естественно, со слэнгом и шутками. "
@@ -66,7 +66,7 @@ BASE_INSTRUCTION = (
 )
 DEFAULT_STYLE_INSTRUCTION = "Отвечай коротко, легко и шутливо."
 
-# ========= УТИЛИТЫ =========
+#УТИЛИТЫ
 def safe_truncate(text: str, n: int = 120) -> str:
     return text if len(text) <= n else text[:n] + "..."
 
@@ -113,7 +113,7 @@ def _parse_schema_line(line: str) -> Optional[Dict[str, Any]]:
         "embed_text": embed_text,
     }
 
-# ========= ЗАГРУЗКА =========
+#ЗАГРУЗКА
 def _download_model_from_gcs(bucket: storage.Bucket, prefix: str) -> None:
     blobs = list(bucket.list_blobs(prefix=prefix))
     if not blobs:
@@ -159,7 +159,7 @@ def initialize():
     if _initialized:
         return
 
-    # Важно: строка — одной строкой, без переноса
+
     print(f"CONFIG: bucket={GCS_BUCKET}, schemas_file={SCHEMAS_FILE}, model_prefix={MODEL_GCS_PREFIX}", flush=True)
     logger.info("Инициализация...")
 
@@ -205,7 +205,7 @@ def initialize():
         _initialized = True
         logger.error("Критическая ошибка инициализации: %s", e)
 
-# ========= RAG =========
+#  RAG
 def search_schema(query: str, top_k: int = TOP_K) -> List[Dict[str, Any]]:
     if not schemas or embedding_model is None:
         logger.info("RAG отключён: schemas=%d, model_loaded=%s", len(schemas), bool(embedding_model))
@@ -223,7 +223,7 @@ def search_schema(query: str, top_k: int = TOP_K) -> List[Dict[str, Any]]:
     scored: List[Tuple[int, float]] = []
     for idx, p in enumerate(schemas):
         sim = cosine_similarity(q, p["embedding"])
-        hits = sum(1 for t in p["triggers"] if t and t in low)  # бонус за совпадение триггеров
+        hits = sum(1 for t in p["triggers"] if t and t in low)
         sim += TRIGGER_BONUS * hits
         scored.append((idx, sim))
 
@@ -238,11 +238,11 @@ def search_schema(query: str, top_k: int = TOP_K) -> List[Dict[str, Any]]:
           [schemas[idx] for idx, s in scored[:max(1, top_k)]]
     return top
 
-# ========= ПРОМПТ =========
+#ПРОМПТ
 def get_system_prompt(user_message: str) -> str:
     low = (user_message or "").lower()
 
-    # Шуточные триггеры (анти-рецепт)
+    # Шуточные триггеры
     if any(w in low for w in ["рецепт", "кружка", "кроссовки", "свиные крылышки"]):
         instr = "Над тобой шутят, не отвечай серьёзно, пошути в ответ, максимум 1-2 предложения. Не давай никаких рецептов."
         return f"{BASE_INSTRUCTION} {instr}".strip()
@@ -266,7 +266,7 @@ def get_system_prompt(user_message: str) -> str:
 
     return f"{BASE_INSTRUCTION} {instruction}".strip()
 
-# ========= OpenRouter =========
+# OpenRouter
 def _try_openrouter(messages: List[dict], model: str) -> Optional[str]:
     if not OPENROUTER_API_KEY:
         return None
@@ -330,7 +330,7 @@ def get_ai_response(user_message: str) -> str:
 
     return "сервачок шалит, но я скоро вернусь — кинь ещё раз через минутку"
 
-# ========= Telegram =========
+# Телеграм
 def send_telegram_message(chat_id: int, text: str):
     if not TG_TOKEN:
         logger.warning("TG_TOKEN не задан — не могу отправить сообщение в Telegram.")
@@ -344,9 +344,9 @@ def send_telegram_message(chat_id: int, text: str):
     except requests.exceptions.RequestException as e:
         logger.error("Сетевая ошибка при отправке в Telegram: %s", e)
 
-# ========= ENTRYPOINT =========
+# точка входа
 def telegram_webhook(request):
-    # Диагностика: GET ?diag=1
+    # Диагностика
     if request.method == "GET" and getattr(request, "args", None) and request.args.get("diag") == "1":
         if not _initialized:
             try:
@@ -370,7 +370,7 @@ def telegram_webhook(request):
         if not data:
             return "OK", 200
 
-        # 1) Web API: message это строка
+        # Web API
         if isinstance(data.get("message"), str):
             user_message = data["message"].strip()
             if not user_message:
@@ -380,7 +380,7 @@ def telegram_webhook(request):
             ai_response = get_ai_response(user_message)
             return {"response": ai_response}, 200
 
-        # 2) Telegram update
+        # Telegram update
         if (
             "update_id" in data
             or isinstance(data.get("message"), dict)
@@ -388,7 +388,7 @@ def telegram_webhook(request):
             or "channel_post" in data
             or "callback_query" in data
         ):
-            # Достаём Telegram message
+            #  Telegram message
             msg = (
                 data.get("message")
                 or data.get("edited_message")
@@ -416,7 +416,7 @@ def telegram_webhook(request):
             send_telegram_message(chat_id, ai_response)
             return "OK", 200
 
-        # 3) Неизвестный формат
+        # если ошибка
         logger.warning("Bad request: keys=%s", list(data.keys()))
         return "Bad Request", 400
 
