@@ -1,0 +1,243 @@
+{% extends 'chat/base.html' %}
+{% load static %}
+{% block title %}Обо мне{% endblock %}
+
+{% block content %}
+
+<style>
+    body {
+        background-color: #f0f0f0;
+        font-family: Arial, sans-serif;
+    }
+
+    .about-section {
+        max-width: 1000px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+
+    /* Заголовок */
+    h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 40px;
+    }
+
+    /* Контейнер с карточками */
+    .cards-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-bottom: 40px;
+    }
+
+    /* Карточка */
+    .card {
+        background: white;
+        border-radius: 8px;
+        border: 2px solid transparent;
+        overflow: hidden;
+        transition: border 0.3s;
+    }
+
+    .card:hover {
+        border: 2px solid #667eea;
+    }
+
+    /*
+
+    ФОТОГРАФИИ
+
+    */
+    .card-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .card-content {
+        padding: 20px;
+    }
+
+    .card-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    /*
+
+    ТЕКСТ
+
+    */
+    .card-text {
+        color: #666;
+        line-height: 1.6;
+    }
+
+    /* Текстовая секция */
+    .text-section {
+        background: white;
+        border-radius: 8px;
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+
+    .text-section h2 {
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    .text-section p {
+        color: #666;
+        line-height: 1.6;
+        margin-bottom: 15px;
+    }
+
+    /* Кнопка */
+    .back-button {
+        display: inline-block;
+        padding: 12px 30px;
+        background-color: #667eea;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        border: 2px solid transparent;
+        transition: border 0.3s;
+    }
+
+    .back-button:hover {
+        border: 2px solid #333;
+    }
+</style>
+
+<div class="about-section">
+    <!--
+
+    ЗАГОЛОВОК
+
+    -->
+    <h1>Психолог, клинический психолог, детский психолог.</h1>
+
+    <!-- Карточки с изображениями -->
+    <div class="cards-container">
+
+        <!--
+
+        КАРТОЧКА 1
+
+        -->
+        <div class="card">
+            <!-- ФОТО 1 -->
+            <img
+                src="{% static 'img1.png' %}"
+                alt="Психотерапевт"
+                class="card-image"
+            />
+            <div class="card-content">
+                <!-- ЗАГОЛОВОК 1 -->
+                <h3 class="card-title">Психотерапевт</h3>
+                <!-- ТЕКСТ 1 -->
+                <p class="card-text">
+                    Психотерапевт с большим опытом.
+                </p>
+            </div>
+        </div>
+
+        <!--
+
+        КАРТОЧКА 2
+
+        -->
+        <div class="card">
+            <!-- ФОТО 2 -->
+            <img
+                src="{% static 'img2.jpg' %}"
+                alt="О каких схемах речь?"
+                class="card-image"
+            />
+            <div class="card-content">
+                <!-- ЗАГОЛОВОК 2 -->
+                <h3 class="card-title">Современные технологии</h3>
+                <!-- ТЕКСТ 2 -->
+                <p class="card-text">
+                    Когнитивные схемы — это глубинные убеждения человека о нём самом,
+                    его взаимоотношениях с другими людьми и мире вокруг.
+                    Схемы формируются в детском возрасте, и огромное влияние
+                    на этот процесс оказывает семья, отношения ребёнка со
+                    значимыми взрослыми и социумом.
+
+.
+                </p>
+            </div>
+        </div>
+
+        <!--
+
+        КАРТОЧКА 3
+
+        -->
+        <div class="card">
+            <!-- ФОТО 3:  -->
+            <img
+                src="{% static 'img4.png' %}"
+                alt="<База>"
+                class="card-image"
+            />
+            <div class="card-content">
+                <!-- ЗАГОЛОВОК 3 -->
+                <h3 class="card-title">Базовые потребности</h3>
+                <!-- ТЕКСТ 3 -->
+                <ul class="card-list">
+    <li>безопасность и связь со значимыми взрослыми;</li>
+    <li>возможность выражать свои эмоции и нужды;</li>
+    <li>возможность проявлять самостоятельность и действовать автономно;</li>
+    <li>установка реалистичных, понятных и разумных границ;</li>
+    <li>возможность регулярно проявлять спонтанность и играть.</li>
+</ul>
+            </div>
+        </div>
+
+    </div>
+
+    <!--
+ ТЕКСТ
+    -->
+    <div class="text-section">
+        <!-- БОЛЬШОЙ ЗАГОЛОВОК -->
+        <h2>Почему выбирают меня?</h2>
+
+        <!-- ТЕКСТ -  <p> -->
+        <ul class="text-section">
+
+<li>Работаю в интегративном подходе: со взрослыми преимущественно схема-терапия (3-я волна КБТ), с детьми - игровые методы, песочная терапия (sandplay) и Арт-терапия.</li>
+
+<li>В своей практике я отдаю предпочтения принципам гуманизма, атмосфере безусловного принятия и уважения.</li>
+
+<li>Мой девиз «Сделай шаг, и дорога появится сама собой» С.Джобс</li>
+
+<li>Работаю в направлениях: Арт-терапия, Песочная терапия, Схема-терапия, Клиническая психология.</li>
+        </ul>
+
+        <p>
+            На сайте запущен чат-бот для ознакомления с основными режимами схематерапии.
+        </p>
+
+        <p>
+            <strong>С чем ко мне обращаются:</strong><br>
+            • ☑️тревога,беспокойство,страхи;<br>
+            • ☑️психосоматические проявления;<br>
+            • ☑️стрессовые состояния;<br>
+            • ☑️гиперактивность или замкнутость;<br>
+            • ☑️детско-родительские отношения;
+        </p>
+    </div>
+
+    <!-- Кнопка возврата -->
+    <div style="text-align: center;">
+        <a href="{% url 'chat_page' %}" class="back-button">← Вернуться к чату</a>
+    </div>
+</div>
+
+{% endblock %}
